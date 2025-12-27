@@ -16,24 +16,30 @@ def main():
     Y_one_hot = enc.fit_transform(y.reshape(-1, 1))
     x_train, x_test, t_train, t_test = train_test_split(X, Y_one_hot, test_size=0.1, random_state=42)
     
-    iters_num = 1000 
-    batch_size = 100
-    
     print("--- Training with Normalized Data ---")
     x_train_norm = x_train / 255.0
     x_test_norm = x_test / 255.0
+
+    in_size = x_train.shape[1]  
+    out_size = t_train.shape[1] 
+
+    hidden = [100, 50]
+    activations = ['sigmoid', 'relu']
     tuner = Hyperparameter(x_train_norm, t_train, x_test_norm, t_test)
-    _results = tuner.search(lr_list=[0.01, 0.001], batch_sizes=[64, 128])
+    _results = tuner.search(lr_list=[0.01, 0.001], 
+                            batch_sizes=[64, 128],
+                            input_size=in_size,
+                            hidden_list=hidden,
+                            act_list=activations,
+                            output_size=out_size)
     
     best_config = max(_results, key=_results.get)
     best_lr, best_batch = best_config
 
-    
-    final_network = NeuralNetwork(input_size=784, 
-                                  hidden_layers_list=[100, 50], 
-                                  activations_list=['sigmoid', 'relu'], 
-                                  output_size=10)
-
+    final_network = NeuralNetwork(input_size=in_size, 
+                                  hidden_layers_list=hidden, 
+                                  activations_list=activations, 
+                                  output_size=out_size)
     optimizer = Adam(lr=best_lr)
     trainer = Trainer(final_network, x_train_norm, t_train, x_test_norm, t_test,
                       epochs=5, batch_size=best_batch, optimizer=optimizer)

@@ -11,28 +11,44 @@ class NeuralNetwork:
         self.layers = []
         
         all_sizes = [input_size] + hidden_layers_list + [output_size]
+
         for i in range(len(hidden_layers_list)):
+            act_type = activations_list[i].lower()
             idx = i + 1 
-            self.params[f'W{idx}'] = weight_init_std * np.random.randn(all_sizes[i], all_sizes[i+1])
-            self.params[f'b{idx}'] = np.zeros(all_sizes[i+1])
+            n_in = all_sizes[i]
+            n_out = all_sizes[i+1]
+            if act_type == 'relu':
+                # He Initialization 
+                scale = np.sqrt(2.0 / n_in)
+            elif act_type in ['sigmoid', 'tanh']:
+                # Xavier Initialization
+                scale = np.sqrt(1.0 / n_in)
+            else:
+                scale = 0.01
+
+            self.params[f'W{idx}'] = scale * np.random.randn(n_in, n_out)
+            self.params[f'b{idx}'] = np.zeros(n_out)
             self.layers.append(Affine(self.params[f'W{idx}'], self.params[f'b{idx}']))
-
-
-            self.params[f'gamma{idx}'] = np.ones(all_sizes[i+1])
-            self.params[f'beta{idx}'] = np.zeros(all_sizes[i+1])
+            
+            self.params[f'gamma{idx}'] = np.ones(n_out)
+            self.params[f'beta{idx}'] = np.zeros(n_out)
             self.layers.append(BatchNormalization(self.params[f'gamma{idx}'], self.params[f'beta{idx}']))
 
-            act_type = activations_list[i].lower()
+            
             if act_type == 'relu':
                 self.layers.append(Relu())
             elif act_type == 'sigmoid':
                 self.layers.append(Sigmoid())
-            
+            elif act_type == 'tanh':
+                self.layers.append(Tanh())
+
+
         last_idx = len(hidden_layers_list) + 1
-        self.params[f'W{last_idx}'] = weight_init_std * np.random.randn(all_sizes[-2], all_sizes[-1])
+        scale_out = np.sqrt(1.0 / all_sizes[-2])
+        self.params[f'W{last_idx}'] = scale_out * np.random.randn(all_sizes[-2], all_sizes[-1])
         self.params[f'b{last_idx}'] = np.zeros(all_sizes[-1])
-        
         self.layers.append(Affine(self.params[f'W{last_idx}'], self.params[f'b{last_idx}']))
+        
         self.lastLayer = SoftmaxWithLoss()
 
     def predict(self, x, train_flg=False):

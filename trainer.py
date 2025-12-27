@@ -42,6 +42,5 @@ class Trainer:
                 
                 self.train_acc_list.append(train_acc)
                 self.test_acc_list.append(test_acc)
-                print(f"Epoch {epoch_num} | Loss: {loss:.4f} | Train Acc: {train_acc:.4f} | Test Acc: {test_acc:.4f}")
         
         return self.train_loss_list, self.train_acc_list, self.test_acc_list

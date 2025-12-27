@@ -33,6 +33,39 @@ class Sigmoid(Layer):
     def backward(self, dout):
         dx = dout * (1.0 - self.out) * self.out
         return dx
+
+
+class Tanh(Layer):
+    def __init__(self):
+          super().__init__()
+          self.out = None
+    def forward(self, x):
+        self.out = np.tanh(x)
+        return self.out
+
+    def backward(self, dout):
+
+        return dout * (1.0 - self.out**2)
+
+
+
+class LeakyRelu(Layer):
+    def __init__(self, alpha=0.01):
+        super().__init__()
+        self.alpha = alpha 
+        self.mask = None
+
+    def forward(self, x):
+        self.mask = (x <= 0)
+        out = x.copy()
+        out[self.mask] *= self.alpha
+        return out
+
+    def backward(self, dout):
+        dx = dout.copy()
+        dx[self.mask] *= self.alpha
+        return dx
+    
     
 def softmax(a):
     c = np.max(a, axis=1, keepdims=True)

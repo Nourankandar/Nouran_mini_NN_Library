@@ -6,19 +6,14 @@ class Hyperparameter:
         self.x_train, self.t_train = x_train, t_train
         self.x_test, self.t_test = x_test, t_test
 
-    def search(self, lr_list, batch_sizes):
-        
+    def search(self, lr_list, batch_sizes, input_size, hidden_list, act_list, output_size):
         results = {}
         for lr in lr_list:
             for b_size in batch_sizes:
-                print(f"Testing with lr: {lr}, batch_size: {b_size}")
-                
-                # بناء الشبكة المطلوبة في التوصيف للاختبار
-                # Dense > Sigmoid > BatchNorm > Dense > Relu > Dense > SoftmaxWithLoss
-                network = NeuralNetwork(input_size=784, 
-                                        hidden_layers_list=[100, 50], 
-                                        activations_list=['sigmoid', 'relu'], 
-                                        output_size=10)
+                network = NeuralNetwork(input_size=input_size, 
+                                        hidden_layers_list=hidden_list, 
+                                        activations_list=act_list, 
+                                        output_size=output_size)
                 
                 optimizer = Adam(lr=lr)
                 trainer = Trainer(network, self.x_train, self.t_train, self.x_test, self.t_test,
